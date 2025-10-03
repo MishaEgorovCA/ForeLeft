@@ -32,7 +32,7 @@
 <body class="bg-background-light dark:bg-background-dark font-display">
 <div class="flex flex-col min-h-screen">
 <header class="flex items-center p-4">
-<button class="text-black dark:text-white">
+<button onclick="window.location.href='/Welcome'" class="text-black dark:text-white">
 <span class="material-symbols-outlined"> arrow_back </span>
 </button>
 <h1 class="text-xl font-bold text-black dark:text-white text-center flex-grow pr-8">Log In</h1>
@@ -51,14 +51,14 @@
 <a class="text-sm font-semibold text-primary" href="#">Forgot Password?</a>
 </div>
 <div class="pt-4">
-<button class="w-full bg-primary text-background-dark font-bold py-4 px-4 rounded-xl h-14 flex items-center justify-center" type="submit">Log In</button>
+<button onclick="window.location.href='/Profile'" class="w-full bg-primary text-background-dark font-bold py-4 px-4 rounded-xl h-14 flex items-center justify-center">Log In</button>
 </div>
 </form>
 </main>
 <footer class="p-6 text-center">
 <p class="text-sm text-black/60 dark:text-white/60">
             Don't have an account?
-            <a class="font-semibold text-primary" href="#">Sign Up</a>
+            <a class="font-semibold text-primary" href="/Signup">Sign Up</a>
 </p>
 </footer>
 </div>
