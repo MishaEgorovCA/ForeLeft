@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Golf Course Directory</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Lexend:wght@400;500;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet"/>
+<script>tailwind.config = {darkMode: "class", theme: {extend: {colors: {primary: "#3ad377", "background-light": "#f6f8f7", "background-dark": "#131f18"}, fontFamily: {display: "Lexend"}, borderRadius: {DEFAULT: "0.25rem", lg: "0.5rem", xl: "0.75rem", full: "9999px"}}}};</script>
+<style>
+      .material-symbols-outlined {
+        font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+      }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark font-display text-stone-900 dark:text-stone-100">
+<div class="flex h-screen flex-col">
+<header class="sticky top-0 z-10 bg-background-light/80 dark:bg-background-dark/80 backdrop-blur-sm">
+<div class="flex items-center p-4">
+<div class="w-10"></div>
+<h1 class="flex-1 text-center text-lg font-bold">Courses</h1>
+<div class="w-10"></div>
+</div>
+<div class="px-4 pb-4">
+<div class="relative">
+<div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-4">
+<span class="material-symbols-outlined text-stone-500 dark:text-stone-400"> search </span>
+</div>
+<input class="w-full rounded-full border-0 bg-background-dark/50 dark:bg-background-light/5 py-3 pl-12 pr-4 text-stone-900 dark:text-white placeholder:text-stone-500 dark:placeholder:text-stone-400 focus:outline-none focus:ring-2 focus:ring-primary" placeholder="Search courses" type="search"/>
+</div>
+</div>
+</header>
+<main class="flex-1 overflow-y-auto">
+<div class="divide-y divide-background-dark/50 dark:divide-background-light/10">
+<a class="flex items-center gap-4 p-4 transition-colors hover:bg-background-dark/10 dark:hover:bg-background-light/5" href="#">
+<img alt="Willow Creek Golf Club" class="h-20 w-20 rounded-lg object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAWuLyS1Xs2I3cGp94TQcDjhvTHuI2OWNBVyguKsqftr_rZVWYE0MT3FGCpzcdwEKpqXSs6VCpSjpDyBvaZ_zxexqem_1IBtuzzwhUWIUfQKeklfoXWQiFE-WdalXJ8J9SpyBxpIRAQh82j13p95Xb6ovZ_YNXAMOm63WXseHGNzmDyKvLQ7Zdw9wfCoqxT1yl4xvD75fmcmnDlxaLB0XSGt9ucRhPFpJ9jsVBWoxi4w42mG6B7kyt2pLW353FZLMWayFUlktynBOo"/>
+<div class="flex-1">
+<h2 class="font-bold">Willow Creek Golf Club</h2>
+<p class="text-sm text-stone-600 dark:text-stone-400">Willow Creek, CA</p>
+<div class="mt-2 flex items-center gap-2 text-sm">
+<div class="flex items-center gap-1 rounded-full bg-primary/20 px-2 py-0.5 text-primary">
+<span class="material-symbols-outlined !text-base"> star </span>
+<span class="font-medium">4.5</span>
+</div>
+<span class="text-stone-500 dark:text-stone-400">1.2 mi</span>
+</div>
+</div>
+<span class="material-symbols-outlined text-stone-400 dark:text-stone-500"> chevron_right </span>
+</a>
+<a class="flex items-center gap-4 p-4 transition-colors hover:bg-background-dark/10 dark:hover:bg-background-light/5" href="#">
+<img alt="Maplewood Golf Course" class="h-20 w-20 rounded-lg object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA40d4yFpZxiDdfzzFnkyi56wZ9ZrGaD1uFuoHn98kzRN_Ea_ZhtRYJRrsSiT83wN9skPXbQaPu9J1V6-Hmaelyucgf7BT1Got4YI3HnbrXG0DkbbuVueGgZR7hLOR5CSzUVPPPjSx4xvvgQ02SAZ7F7hzpUbScW7k-ap3TTPMSgG411iABheVLmNzdlMqNHK5WtQr2u1B3N74er2by9zpYN-IV_XzwQVHpL3B8H8GcLb1D5O_z2M6my5tnuA92hZwL25WE6M98Wj8"/>
+<div class="flex-1">
+<h2 class="font-bold">Maplewood Golf Course</h2>
+<p class="text-sm text-stone-600 dark:text-stone-400">Maplewood, WA</p>
+<div class="mt-2 flex items-center gap-2 text-sm">
+<div class="flex items-center gap-1 rounded-full bg-primary/20 px-2 py-0.5 text-primary">
+<span class="material-symbols-outlined !text-base"> star </span>
+<span class="font-medium">4.2</span>
+</div>
+<span class="text-stone-500 dark:text-stone-400">3.5 mi</span>
+</div>
+</div>
+<span class="material-symbols-outlined text-stone-400 dark:text-stone-500"> chevron_right </span>
+</a>
+<a class="flex items-center gap-4 p-4 transition-colors hover:bg-background-dark/10 dark:hover:bg-background-light/5" href="#">
+<img alt="Oakmont Country Club" class="h-20 w-20 rounded-lg object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCXD5B35qF5r8zfzrEnKnUBB9AL5QnBRCCVRuI0FMRwBTcy6MdzjoUrzlngZ7uLMpkBxegScxt0Tz6E7q4MbQVQzGcgpc4T1s61UJIOYLaf60EAONMV8uw-mj0moD07iK8DWNRg_M1m44KK3Ij_C4yMJVKspQGfW0yaQfHviLXDrOpSc_-h7LRAd6VOUD3B6dByE-IR0LjWQVQIWjwr-yY9VTif5MqZ85Jv9ulUH5vA8glwpHjhhHDUShUVrEAuhcKMCYXX6GzTYPQ"/>
+<div class="flex-1">
+<h2 class="font-bold">Oakmont Country Club</h2>
+<p class="text-sm text-stone-600 dark:text-stone-400">Oakmont, PA</p>
+<div class="mt-2 flex items-center gap-2 text-sm">
+<div class="flex items-center gap-1 rounded-full bg-primary/20 px-2 py-0.5 text-primary">
+<span class="material-symbols-outlined !text-base"> star </span>
+<span class="font-medium">4.8</span>
+</div>
+<span class="text-stone-500 dark:text-stone-400">5.1 mi</span>
+</div>
+</div>
+<span class="material-symbols-outlined text-stone-400 dark:text-stone-500"> chevron_right </span>
+</a>
+<a class="flex items-center gap-4 p-4 transition-colors hover:bg-background-dark/10 dark:hover:bg-background-light/5" href="#">
+<img alt="Pine Ridge Golf Course" class="h-20 w-20 rounded-lg object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuB_ugFsqh9xcGbQzlS1iYXWPteUiGGvV77I9ojHhUxxWyrsuXH42f7zkoUzMIQ05kHIEAn0K0U6-UkB2cnQm1Z8lrX1CVQgIAbGuMJEB-MQkwoWF6IKAMPCT9pQ-OeZ-aNrnyGf2Y7-Njx-gkyXF9pwxiRJ5U_NMrqrNHtjMmVUYT_QmL8EXHtxedDKCfL0gtbnE3aLW8mCqCppmR6O5Qjm-Qr8X_niHBZFXFUiSqg_leqicpE6UCKbAC_5AoAraozp-mhoCDiAjfA"/>
+<div class="flex-1">
+<h2 class="font-bold">Pine Ridge Golf Course</h2>
+<p class="text-sm text-stone-600 dark:text-stone-400">Pine Ridge, SD</p>
+<div class="mt-2 flex items-center gap-2 text-sm">
+<div class="flex items-center gap-1 rounded-full bg-primary/20 px-2 py-0.5 text-primary">
+<span class="material-symbols-outlined !text-base"> star </span>
+<span class="font-medium">4.0</span>
+</div>
+<span class="text-stone-500 dark:text-stone-400">6.8 mi</span>
+</div>
+</div>
+<span class="material-symbols-outlined text-stone-400 dark:text-stone-500"> chevron_right </span>
+</a>
+</div>
+</main>
+<nav class="border-t border-background-dark/50 dark:border-background-light/10 bg-background-light dark:bg-background-dark">
+<div class="flex justify-around py-2">
+<a class="flex flex-col items-center gap-1 p-2 text-primary" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;"> golf_course </span>
+<span class="text-xs font-bold">Courses</span>
+</a>
+<a class="flex flex-col items-center gap-1 p-2 text-stone-500 dark:text-stone-400" href="#">
+<span class="material-symbols-outlined"> groups </span>
+<span class="text-xs">Match</span>
+</a>
+<a class="flex flex-col items-center gap-1 p-2 text-stone-500 dark:text-stone-400" href="#">
+<span class="material-symbols-outlined"> person </span>
+<span class="text-xs">Profile</span>
+</a>
+</div>
+<div class="pb-safe-area-inset-bottom h-5 bg-background-light dark:bg-background-dark"></div>
+</nav>
+</div>
+</body></html>
