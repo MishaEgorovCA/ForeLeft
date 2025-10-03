@@ -14,22 +14,81 @@
         body {
             min-height: max(884px, 100dvh);
         }
+
+        #handicap-slider {
+            -webkit-appearance: none;
+            appearance: none;
+            background: transparent;
+            outline: none;
+            opacity: 0;
+        }
+
+        #handicap-slider::-webkit-slider-thumb,
+        #handicap-slider::-moz-range-thumb,
+        #handicap-slider::-ms-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            background: transparent;
+            border: none;
+            width: 16px;
+            height: 16px;
+        }
+
+        #handicap-slider::-webkit-slider-runnable-track,
+        #handicap-slider::-moz-range-track,
+        #handicap-slider::-ms-track {
+            background: transparent;
+            border: none;
+        }
+
+        .select-wrapper {
+            position: relative;
+        }
+
+        .select-wrapper::after {
+            content: "";
+            position: absolute;
+            pointer-events: none;
+            right: 1.25rem;
+            top: 50%;
+            width: 0.5rem;
+            height: 0.5rem;
+            border-right: 2px solid currentColor;
+            border-bottom: 2px solid currentColor;
+            transform: translateY(-65%) rotate(45deg);
+            opacity: 0.7;
+        }
+
+        .custom-select {
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+            width: 100%;
+            border: 1px solid rgba(19, 31, 24, 0.08);
+            border-radius: 9999px;
+            padding: 1rem 3.5rem 1rem 1.25rem;
+            font-weight: 500;
+            background-color: rgba(19, 31, 24, 0.05);
+            color: rgba(19, 31, 24, 0.85);
+            transition: border 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
+        }
+
+        .custom-select:focus-visible {
+            outline: none;
+            border-color: #3ad377;
+            box-shadow: 0 0 0 3px rgba(58, 211, 119, 0.25);
+        }
+
+        .dark .custom-select {
+            border-color: rgba(246, 248, 247, 0.12);
+            background-color: rgba(246, 248, 247, 0.08);
+            color: rgba(246, 248, 247, 0.92);
+        }
+
+        .dark .select-wrapper::after {
+            color: rgba(246, 248, 247, 0.72);
+        }
     </style>
-<style>
-    body {
-      min-height: max(884px, 100dvh);
-    }
-  </style>
-<style>
-    body {
-      min-height: max(884px, 100dvh);
-    }
-  </style>
-<style>
-    body {
-      min-height: max(884px, 100dvh);
-    }
-  </style>
 </head>
 <body class="bg-background-light dark:bg-background-dark font-display">
 <div class="flex flex-col h-screen justify-between">
@@ -48,12 +107,13 @@
                     </h2>
 <div class="bg-white/5 dark:bg-white/5 rounded p-4 space-y-4">
 <div class="flex justify-between items-center text-black dark:text-white">
-<span class="font-medium">Handicap</span>
-<span class="font-bold text-primary">15</span>
+<span id="handicap-label" class="font-medium">Handicap</span>
+<span id="handicap-value" class="font-bold text-primary">15</span>
 </div>
 <div class="relative h-2 bg-black/10 dark:bg-white/10 rounded-full">
-<div class="absolute top-0 left-0 h-2 bg-primary rounded-full" style="width: 32%"></div>
-<div class="absolute h-4 w-4 bg-primary rounded-full -top-1" style="left: 32%; transform: translateX(-50%)"></div>
+<div id="handicap-progress" class="absolute top-0 left-0 h-2 bg-primary rounded-full" style="width: 0%"></div>
+<div id="handicap-thumb" class="absolute h-4 w-4 bg-primary rounded-full -top-1" style="left: 0%; transform: translateX(-50%)"></div>
+<input id="handicap-slider" type="range" min="0" max="36" step="1" value="15" aria-labelledby="handicap-label" class="absolute inset-0 h-6 w-full appearance-none bg-transparent cursor-pointer"/>
 </div>
 </div>
 </div>
@@ -152,21 +212,52 @@
 </div>
 </main>
 </div>
-<footer class="sticky bottom-0 bg-background-light/90 dark:bg-background-dark/90 backdrop-blur-sm border-t border-black/10 dark:border-white/10">
-<nav class="flex justify-around items-center h-20">
-<a class="flex flex-col items-center gap-1 text-black/60 dark:text-white/60" href="/Courses">
-<span class="material-symbols-outlined">golf_course</span>
-<span class="text-xs font-medium">Courses</span>
+<nav class="border-t border-background-dark/50 dark:border-background-light/10 bg-background-light dark:bg-background-dark">
+<div class="flex justify-around py-2">
+<a class="flex flex-col items-center gap-1 p-2 text-stone-500 dark:text-stone-400" href="/Courses">
+<span class="material-symbols-outlined"> golf_course </span>
+<span class="text-xs">Courses</span>
 </a>
-<a class="flex flex-col items-center gap-1 text-primary" href="/Match">
-<span class="material-symbols-outlined">group</span>
-<span class="text-xs font-medium">Match</span>
+<a class="flex flex-col items-center gap-1 p-2 text-primary" href="/Match">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;"> groups </span>
+<span class="text-xs font-bold">Match</span>
 </a>
-<a class="flex flex-col items-center gap-1 text-black/60 dark:text-white/60" href="/Profile">
-<span class="material-symbols-outlined">person</span>
-<span class="text-xs font-medium">Profile</span>
+<a class="flex flex-col items-center gap-1 p-2 text-stone-500 dark:text-stone-400" href="/Profile">
+<span class="material-symbols-outlined"> person </span>
+<span class="text-xs">Profile</span>
 </a>
-</nav>
-</footer>
 </div>
+<div class="pb-safe-area-inset-bottom h-5 bg-background-light dark:bg-background-dark"></div>
+</nav>
+</div>
+</div>
+<script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const slider = document.getElementById("handicap-slider");
+            const valueLabel = document.getElementById("handicap-value");
+            const progress = document.getElementById("handicap-progress");
+            const thumb = document.getElementById("handicap-thumb");
+
+            if (!slider || !valueLabel || !progress || !thumb) {
+                return;
+            }
+
+            const updateSlider = (value) => {
+                const min = Number(slider.min) || 0;
+                const max = Number(slider.max) || 100;
+                const numericValue = Number(value);
+                const percent = ((numericValue - min) / (max - min)) * 100;
+
+                valueLabel.textContent = numericValue.toString();
+                progress.style.width = `${percent}%`;
+                thumb.style.left = `${percent}%`;
+            };
+
+            updateSlider(slider.value);
+
+            slider.addEventListener("input", (event) => {
+                updateSlider(event.target.value);
+            });
+        });
+    </script>
 </body></html>
