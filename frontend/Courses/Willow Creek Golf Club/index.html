@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Course Details</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Lexend:wght@400;500;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet"/>
+<script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        primary: "#3ad377",
+                        "background-light": "#f6f8f7",
+                        "background-dark": "#131f18"
+                    },
+                    fontFamily: {
+                        display: "Lexend"
+                    },
+                    borderRadius: {
+                        DEFAULT: "0.25rem",
+                        lg: "0.5rem",
+                        xl: "0.75rem",
+                        full: "9999px"
+                    }
+                }
+            }
+        };
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+    </style>
+<style>
+        body {
+            min-height: max(884px, 100dvh);
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark font-display text-stone-900 dark:text-stone-100">
+<div class="flex h-screen flex-col">
+<header class="relative h-48">
+<img alt="Willow Creek Golf Club" class="absolute h-full w-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAWuLyS1Xs2I3cGp94TQcDjhvTHuI2OWNBVyguKsqftr_rZVWYE0MT3FGCpzcdwEKpqXSs6VCpSjpDyBvaZ_zxexqem_1IBtuzzwhUWIUfQKeklfoXWQiFE-WdalXJ8J9SpyBxpIRAQh82j13p95Xb6ovZ_YNXAMOm63WXseHGNzmDyKvLQ7Zdw9wfCoqxT1yl4xvD75fmcmnDlxaLB0XSGt9ucRhPFpJ9jsVBWoxi4w42mG6B7kyt2pLW353FZLMWayFUlktynBOo"/>
+<div class="absolute inset-0 bg-gradient-to-t from-background-dark/80 to-transparent"></div>
+<div class="absolute top-0 left-0 p-4">
+<a class="flex h-8 w-8 items-center justify-center rounded-full bg-white/20 text-white backdrop-blur-sm" href="/Courses">
+<span class="material-symbols-outlined"> chevron_left </span>
+</a>
+</div>
+<div class="absolute bottom-0 left-0 p-4">
+<h1 class="text-2xl font-bold text-white">Willow Creek Golf Club</h1>
+<p class="text-sm text-stone-300">Willow Creek, CA</p>
+</div>
+</header>
+<main class="flex-1 overflow-y-auto">
+<div class="p-4">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-2">
+<div class="flex items-center gap-1 rounded-full bg-primary/20 px-2 py-0.5 text-primary">
+<span class="material-symbols-outlined !text-base"> star </span>
+<span class="font-medium">4.5</span>
+</div>
+<span class="text-sm text-stone-500 dark:text-stone-400">(212 reviews)</span>
+</div>
+<button class="rounded-full bg-primary px-6 py-3 font-bold text-background-dark transition-colors hover:bg-primary/90">
+                        Book Now
+                    </button>
+</div>
+</div>
+<div class="px-4 pt-4 pb-2">
+<h2 class="text-lg font-bold">Players at this course</h2>
+</div>
+<div class="divide-y divide-background-dark/50 dark:divide-background-light/10">
+<div class="flex items-center gap-4 p-4">
+<img alt="Player avatar" class="h-14 w-14 rounded-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCoXGctd-nTTRmAQJKcI8UU-zdpBJOpoRi7hzBXHx1d7LtI0p1eCXuD7vFXTww_PuOanKLIMUmVIKUmD9vtMLAWV6o9FsifEZlDXa5EJ_XAHzFURLcm8hobPT6K4HQQxbSSnF6O2Qbz5fkUUkGlULhvZ215lS82C68h0g3V6S5U5g5dW1VD1-U9L4bvexhLE7TJIv7jyUEEMMfndsM5VnZ4l69l3-APtv_Y4CcpLhmXE995VYQznGcbl2GuQb4bPCjqritH5jHGwJw"/>
+<div class="flex-1">
+<h3 class="font-bold">Alex Thompson</h3>
+<div class="flex items-center gap-4 text-sm text-stone-600 dark:text-stone-400">
+<span>HCP: 12</span>
+<span>Avg Score: 85</span>
+</div>
+</div>
+<button class="rounded-full border border-primary px-4 py-2 text-sm font-bold text-primary transition-colors hover:bg-primary/10">
+                        Match
+                    </button>
+</div>
+<div class="flex items-center gap-4 p-4">
+<img alt="Player avatar" class="h-14 w-14 rounded-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAOSMTfmuyG2AnaZcBL4cib9BLt2rAlzaQUbNK0xfBJZMtX-SKnlgpB-9MK7oyIZFDsZI5cluxjkFroI3narVpb2S1TYGGhi2zvRDk9gnEtEKMrERffD5keOU5v1E0FIsf4-iXHpezuGlDPjszjTO_Fkt9-ByRhkp9vNyb5gYxPjmb76qZ6owCPuG6GV2rUnL_--5deLmC6tOq0dGZfFZCwlbaW2Mf8AEfQpQ5p6viX5zgCaOMbnENMdyCh2DGC2kmUSnY3efi9eL0"/>
+<div class="flex-1">
+<h3 class="font-bold">Samantha Miller</h3>
+<div class="flex items-center gap-4 text-sm text-stone-600 dark:text-stone-400">
+<span>HCP: 8</span>
+<span>Avg Score: 81</span>
+</div>
+</div>
+<button class="rounded-full border border-primary px-4 py-2 text-sm font-bold text-primary transition-colors hover:bg-primary/10">
+                        Match
+                    </button>
+</div>
+<div class="flex items-center gap-4 p-4">
+<img alt="Player avatar" class="h-14 w-14 rounded-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCKIrGnBbv6HstQ66mI5n64l0afmWHbFM-myZDBZnvFbEtUZ1nRpDDlYfOOZqXOuhpdeg2pGOoArcp_71d9O7rVKTBqnU5BrVeBrgyliKrzcla0ocfomYkg-wJ0YRiWnlPxyC2kHBRSePxckv3KDZ9pIReNL6cSqZ64DjZe5rmTwt-SJrFWQCaWY9NxbgtObyqA4Xi-hrBRclI-F2Syk-m4O8wqoeIuesBXH2NdlT3scX7yp0KmUCKwkbOzgt8KTpKm4RKCuXJOI-4"/>
+<div class="flex-1">
+<h3 class="font-bold">David Chen</h3>
+<div class="flex items-center gap-4 text-sm text-stone-600 dark:text-stone-400">
+<span>HCP: 15</span>
+<span>Avg Score: 90</span>
+</div>
+</div>
+<button class="rounded-full border border-primary px-4 py-2 text-sm font-bold text-primary transition-colors hover:bg-primary/10">
+                        Match
+                    </button>
+</div>
+<div class="flex items-center gap-4 p-4">
+<img alt="Player avatar" class="h-14 w-14 rounded-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDJNGjRrZr_Z3f_AszanKVqW2E0dGIagnFrSGfgtUd4vOFGNa7H7ecdKW1_BNuoiZLoFBPrbL2P1gL4oLlSdnRzPb-fJPubskKke7wwQvG821FxxFDdQbI9-E5Yw4G4I9txnpWCpyZFOtYE7mR6BxDSZnG3ScxVeMUe3Dy8DWegHVzmMiajU7U4x1KswEsWuyJ4DxpLkh-8MXDny01Tclv7FhxUJfgSwBENrYUSQEOXQ7ERcD8nTFM9AkZ-jaYJTUWNmvRqK9UIjTY"/>
+<div class="flex-1">
+<h3 class="font-bold">Jessica Rodriguez</h3>
+<div class="flex items-center gap-4 text-sm text-stone-600 dark:text-stone-400">
+<span>HCP: 5</span>
+<span>Avg Score: 78</span>
+</div>
+</div>
+<button class="rounded-full border border-primary px-4 py-2 text-sm font-bold text-primary transition-colors hover:bg-primary/10">
+                        Match
+                    </button>
+</div>
+</div>
+</main>
+<nav class="fixed bottom-0 left-0 right-0 border-t border-white/10 bg-background-light/80 pb-3 pt-2 backdrop-blur-sm dark:border-white/20 dark:bg-background-dark/80">
+<div class="flex justify-around">
+<a class="flex flex-1 flex-col items-center gap-1 text-primary" href="/Courses">
+<span class="material-symbols-outlined"> golf_course </span>
+<p class="text-xs font-medium">Courses</p>
+</a>
+<a class="flex flex-1 flex-col items-center gap-1 text-black/60 dark:text-white/60" href="/Match">
+<span class="material-symbols-outlined"> search </span>
+<p class="text-xs font-medium">Match</p>
+</a>
+<a class="flex flex-1 flex-col items-center gap-1 text-black/60 dark:text-white/60" href="/Groups">
+<span class="material-symbols-outlined"> groups </span>
+<p class="text-xs font-medium">Groups</p>
+</a>
+<a class="flex flex-1 flex-col items-center gap-1 text-black/60 dark:text-white/60" href="/Profile">
+<span class="material-symbols-outlined"> person </span>
+<p class="text-xs font-medium">Profile</p>
+</a>
+</div>
+</nav>
+</div>
+
+</body></html>
