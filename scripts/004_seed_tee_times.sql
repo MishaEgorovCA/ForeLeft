@@ -2,14 +2,14 @@
 DO $$
 DECLARE
   course_record RECORD;
-  current_date DATE;
+  tee_date DATE; -- Renamed from current_date to avoid conflict with PostgreSQL function
   time_slot TIME;
 BEGIN
   -- Loop through each course
   FOR course_record IN SELECT id FROM public.courses LOOP
     -- Loop through next 7 days
     FOR i IN 0..6 LOOP
-      current_date := CURRENT_DATE + i;
+      tee_date := CURRENT_DATE + i; -- Using renamed variable
       
       -- Add tee times from 7 AM to 5 PM (every 15 minutes)
       FOR hour IN 7..16 LOOP
@@ -19,7 +19,7 @@ BEGIN
           INSERT INTO public.tee_times (course_id, date, time, available_spots, price)
           VALUES (
             course_record.id,
-            current_date,
+            tee_date, -- Using renamed variable
             time_slot,
             4, -- 4 spots available per tee time
             CASE 

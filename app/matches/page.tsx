@@ -38,6 +38,8 @@ export default function MatchesPage() {
 
       setCurrentUserId(user.id)
 
+      console.log("[v0] Fetching potential matches...")
+
       // Get potential matches (exclude current user)
       let matchesQuery = supabase
         .from("profiles")
@@ -50,7 +52,9 @@ export default function MatchesPage() {
         matchesQuery = matchesQuery.eq("skill_level", selectedSkill)
       }
 
-      const { data: matchesData } = await matchesQuery
+      const { data: matchesData, error: matchesError } = await matchesQuery
+
+      console.log("[v0] Potential matches fetched:", matchesData?.length || 0, "Error:", matchesError)
 
       // Filter by interest if selected
       let filteredMatches = matchesData || []
@@ -219,8 +223,8 @@ export default function MatchesPage() {
                           {profile.avatar_url ? (
                             <img
                               src={profile.avatar_url || "/placeholder.svg"}
-                              alt=""
-                              className="w-16 h-16 rounded-full"
+                              alt={profile.display_name}
+                              className="w-16 h-16 rounded-full object-cover"
                             />
                           ) : (
                             <span className="text-2xl font-bold text-primary">{profile.display_name?.[0] || "?"}</span>

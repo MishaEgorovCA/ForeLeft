@@ -183,15 +183,9 @@ export default function TeeTimesPage() {
                       <div className="flex gap-4">
                         <div className="w-32 h-32 flex-shrink-0 bg-gradient-to-br from-primary/20 to-secondary/20">
                           <img
-                            src={
-                              teeTime.course.image_url ||
-                              `/placeholder.svg?height=200&width=200&query=golf course ${teeTime.course.name || "/placeholder.svg"}`
-                            }
+                            src={`/lush-golf-course.png?key=vpzjd&height=200&width=200&query=golf course ${teeTime.course.name}`}
                             alt={teeTime.course.name}
                             className="w-full h-full object-cover"
-                            onError={(e) => {
-                              console.log("[v0] Image failed to load:", teeTime.course.image_url)
-                            }}
                           />
                         </div>
                         <div className="flex-1 py-4 pr-4 flex flex-col justify-between">
