@@ -1,7 +1,6 @@
 -- Enable UUID extension
 create extension if not exists "uuid-ossp";
 
--- Profiles table (extends auth.users)
 create table if not exists public.profiles (
   id uuid primary key references auth.users(id) on delete cascade,
   email text not null,
@@ -25,6 +24,25 @@ create table if not exists public.profiles (
   created_at timestamptz default now(),
   updated_at timestamptz default now()
 );
+
+-- Ensure new survey fields exist when upgrading an existing schema
+alter table if exists public.profiles
+  add column if not exists match_goals text[] default '{}'::text[];
+
+alter table if exists public.profiles
+  add column if not exists personality_traits text[] default '{}'::text[];
+
+alter table if exists public.profiles
+  add column if not exists play_frequency text;
+
+alter table if exists public.profiles
+  add column if not exists preferred_round_time text;
+
+alter table if exists public.profiles
+  add column if not exists pace_of_play text;
+
+alter table if exists public.profiles
+  add column if not exists swing_tendency text;
 
 -- Courses table
 create table if not exists public.courses (
@@ -151,109 +169,131 @@ alter table public.group_members enable row level security;
 alter table public.messages enable row level security;
 
 -- RLS Policies for profiles
+drop policy if exists "Users can view all profiles" on public.profiles;
 create policy "Users can view all profiles"
   on public.profiles for select
   using (true);
 
+drop policy if exists "Users can update own profile" on public.profiles;
 create policy "Users can update own profile"
   on public.profiles for update
   using (auth.uid() = id);
 
+drop policy if exists "Users can insert own profile" on public.profiles;
 create policy "Users can insert own profile"
   on public.profiles for insert
   with check (auth.uid() = id);
 
 -- RLS Policies for courses (public read)
+drop policy if exists "Anyone can view courses" on public.courses;
 create policy "Anyone can view courses"
   on public.courses for select
   using (true);
 
 -- RLS Policies for tee_times (public read)
+drop policy if exists "Anyone can view tee times" on public.tee_times;
 create policy "Anyone can view tee times"
   on public.tee_times for select
   using (true);
 
 -- RLS Policies for bookings
+drop policy if exists "Users can view own bookings" on public.bookings;
 create policy "Users can view own bookings"
   on public.bookings for select
   using (auth.uid() = user_id);
 
+drop policy if exists "Users can create own bookings" on public.bookings;
 create policy "Users can create own bookings"
   on public.bookings for insert
   with check (auth.uid() = user_id);
 
+drop policy if exists "Users can update own bookings" on public.bookings;
 create policy "Users can update own bookings"
   on public.bookings for update
   using (auth.uid() = user_id);
 
 -- RLS Policies for user_handicaps
+drop policy if exists "Users can view all handicaps" on public.user_handicaps;
 create policy "Users can view all handicaps"
   on public.user_handicaps for select
   using (true);
 
+drop policy if exists "Users can manage own handicaps" on public.user_handicaps;
 create policy "Users can manage own handicaps"
   on public.user_handicaps for all
   using (auth.uid() = user_id);
 
 -- RLS Policies for matches
+drop policy if exists "Users can view their matches" on public.matches;
 create policy "Users can view their matches"
   on public.matches for select
   using (auth.uid() = requester_id or auth.uid() = matched_user_id);
 
+drop policy if exists "Users can create matches" on public.matches;
 create policy "Users can create matches"
   on public.matches for insert
   with check (auth.uid() = requester_id);
 
+drop policy if exists "Users can update their matches" on public.matches;
 create policy "Users can update their matches"
   on public.matches for update
   using (auth.uid() = requester_id or auth.uid() = matched_user_id);
 
 -- RLS Policies for groups
+drop policy if exists "Anyone can view public groups" on public.groups;
 create policy "Anyone can view public groups"
   on public.groups for select
   using (not is_private or creator_id = auth.uid());
 
+drop policy if exists "Users can create groups" on public.groups;
 create policy "Users can create groups"
   on public.groups for insert
   with check (auth.uid() = creator_id);
 
+drop policy if exists "Creators can update their groups" on public.groups;
 create policy "Creators can update their groups"
   on public.groups for update
   using (auth.uid() = creator_id);
 
 -- RLS Policies for group_members
+drop policy if exists "Users can view group members" on public.group_members;
 create policy "Users can view group members"
   on public.group_members for select
   using (true);
 
+drop policy if exists "Users can join groups" on public.group_members;
 create policy "Users can join groups"
   on public.group_members for insert
   with check (auth.uid() = user_id);
 
+drop policy if exists "Users can leave groups" on public.group_members;
 create policy "Users can leave groups"
   on public.group_members for delete
   using (auth.uid() = user_id);
 
 -- RLS Policies for messages
+drop policy if exists "Users can view their messages" on public.messages;
 create policy "Users can view their messages"
   on public.messages for select
   using (auth.uid() = sender_id or auth.uid() = recipient_id);
 
+drop policy if exists "Users can send messages" on public.messages;
 create policy "Users can send messages"
   on public.messages for insert
   with check (auth.uid() = sender_id);
 
+drop policy if exists "Recipients can update message read status" on public.messages;
 create policy "Recipients can update message read status"
   on public.messages for update
   using (auth.uid() = recipient_id);
 
 -- Create indexes for performance
-create index idx_profiles_skill_level on public.profiles(skill_level);
-create index idx_courses_city on public.courses(city);
-create index idx_tee_times_date on public.tee_times(date);
-create index idx_tee_times_course on public.tee_times(course_id);
-create index idx_bookings_user on public.bookings(user_id);
-create index idx_bookings_teetime on public.bookings(tee_time_id);
-create index idx_matches_users on public.matches(requester_id, matched_user_id);
-create index idx_messages_recipient on public.messages(recipient_id);
-create index idx_group_members_group on public.group_members(group_id);
+create index if not exists idx_profiles_skill_level on public.profiles(skill_level);
+create index if not exists idx_courses_city on public.courses(city);
+create index if not exists idx_tee_times_date on public.tee_times(date);
+create index if not exists idx_tee_times_course on public.tee_times(course_id);
+create index if not exists idx_bookings_user on public.bookings(user_id);
+create index if not exists idx_bookings_teetime on public.bookings(tee_time_id);
+create index if not exists idx_matches_users on public.matches(requester_id, matched_user_id);
+create index if not exists idx_messages_recipient on public.messages(recipient_id);
+create index if not exists idx_group_members_group on public.group_members(group_id);
