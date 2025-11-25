@@ -7,6 +7,7 @@ import { MobileNav } from "@/components/mobile-nav"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import Link from "next/link"
+import { isProfileComplete } from "@/lib/utils"
 
 export default function DashboardPage() {
   const router = useRouter()
@@ -32,19 +33,7 @@ export default function DashboardPage() {
       const { data: profileData } = await supabase.from("profiles").select("*").eq("id", user.id).single()
       setProfile(profileData)
 
-      // Check if profile is complete
-      const isProfileComplete =
-        profileData?.skill_level &&
-        profileData?.interests?.length > 0 &&
-        profileData?.match_goals?.length > 0 &&
-        profileData?.personality_traits?.length > 0 &&
-        profileData?.play_frequency &&
-        profileData?.preferred_round_time &&
-        profileData?.pace_of_play &&
-        profileData?.swing_tendency &&
-        profileData?.group_preference
-
-      if (!isProfileComplete) {
+      if (!isProfileComplete(profileData)) {
         router.push("/profile/setup")
         return
       }

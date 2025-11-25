@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import Link from "next/link"
 import { formatLabel } from "@/lib/matchmaking"
+import { APP_VERSION, isProfileComplete } from "@/lib/utils"
 
 export default function ProfilePage() {
   const router = useRouter()
@@ -59,6 +60,9 @@ export default function ProfilePage() {
   return (
     <div className="min-h-svh pb-20 bg-background">
       <div className="max-w-2xl mx-auto px-4 py-6 space-y-6">
+        <div className="flex justify-end">
+          <span className="text-xs text-muted-foreground">Version {APP_VERSION}</span>
+        </div>
         {/* Profile Header */}
         <div className="flex flex-col items-center text-center space-y-4">
           <div className="w-24 h-24 rounded-full bg-primary/10 flex items-center justify-center">
@@ -78,6 +82,22 @@ export default function ProfilePage() {
             <Link href="/profile/edit">Edit Profile</Link>
           </Button>
         </div>
+
+        {!isProfileComplete(profile) && (
+          <Card className="border-dashed border-primary/50">
+            <CardContent className="space-y-3 pt-6">
+              <div className="space-y-1">
+                <div className="text-sm font-semibold text-primary">We have a few new questions for you</div>
+                <p className="text-sm text-muted-foreground">
+                  Finish the latest survey updates so we can keep your matchmaking suggestions accurate.
+                </p>
+              </div>
+              <Button asChild size="sm" className="w-full sm:w-auto">
+                <Link href="/profile/setup">Update Preferences</Link>
+              </Button>
+            </CardContent>
+          </Card>
+        )}
 
         {/* Stats */}
         <div className="grid grid-cols-3 gap-4">
