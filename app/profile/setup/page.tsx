@@ -89,6 +89,30 @@ const GROUP_PREFERENCES = [
   { value: "flexible", label: "Flexible on group size" },
 ]
 
+const BUSINESS_TALK_OPTIONS = [
+  { value: "love_it", label: "Love discussing business & politics" },
+  { value: "open", label: "Open if others bring it up" },
+  { value: "avoid", label: "Prefer to avoid those topics" },
+]
+
+const DRINKS_ON_COURSE_OPTIONS = [
+  { value: "never", label: "Prefer to stay dry" },
+  { value: "occasional", label: "Open to a casual drink" },
+  { value: "always", label: "Enjoy having a few" },
+]
+
+const MONEY_GAME_OPTIONS = [
+  { value: "no_bets", label: "No money games" },
+  { value: "friendly", label: "Friendly low-stakes games" },
+  { value: "competitive", label: "Serious stakes welcome" },
+]
+
+const DISTRACTION_TOLERANCE_OPTIONS = [
+  { value: "not_bothered", label: "Hardly notice talking" },
+  { value: "somewhat_distracted", label: "Prefer some courtesy" },
+  { value: "easily_distracted", label: "Need quiet while swinging" },
+]
+
 export default function ProfileSetupPage() {
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
@@ -106,6 +130,10 @@ export default function ProfileSetupPage() {
     pace_of_play: "",
     swing_tendency: "",
     group_preference: "",
+    business_talk_preference: "",
+    drinks_on_course_preference: "",
+    money_game_preference: "",
+    distraction_tolerance: "",
   })
   const router = useRouter()
   const supabase = createClient()
@@ -138,6 +166,10 @@ export default function ProfileSetupPage() {
           pace_of_play: profile.pace_of_play || "",
           swing_tendency: profile.swing_tendency || "",
           group_preference: profile.group_preference || "",
+          business_talk_preference: profile.business_talk_preference || "",
+          drinks_on_course_preference: profile.drinks_on_course_preference || "",
+          money_game_preference: profile.money_game_preference || "",
+          distraction_tolerance: profile.distraction_tolerance || "",
         })
       }
 
@@ -196,6 +228,10 @@ export default function ProfileSetupPage() {
           pace_of_play: formData.pace_of_play,
           swing_tendency: formData.swing_tendency,
           group_preference: formData.group_preference,
+          business_talk_preference: formData.business_talk_preference,
+          drinks_on_course_preference: formData.drinks_on_course_preference,
+          money_game_preference: formData.money_game_preference,
+          distraction_tolerance: formData.distraction_tolerance,
           updated_at: new Date().toISOString(),
         })
         .eq("id", userId)
@@ -475,6 +511,86 @@ export default function ProfileSetupPage() {
                   ))}
                 </select>
               </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="business_talk_preference">Business & politics chat?</Label>
+                <select
+                  id="business_talk_preference"
+                  value={formData.business_talk_preference}
+                  onChange={(e) => setFormData({ ...formData, business_talk_preference: e.target.value })}
+                  className="w-full px-3 py-2 rounded-lg border border-input bg-background"
+                  required
+                >
+                  <option value="" disabled>
+                    Choose what feels right
+                  </option>
+                  {BUSINESS_TALK_OPTIONS.map((option) => (
+                    <option key={option.value} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="drinks_on_course_preference">Enjoy beverages while playing?</Label>
+                <select
+                  id="drinks_on_course_preference"
+                  value={formData.drinks_on_course_preference}
+                  onChange={(e) => setFormData({ ...formData, drinks_on_course_preference: e.target.value })}
+                  className="w-full px-3 py-2 rounded-lg border border-input bg-background"
+                  required
+                >
+                  <option value="" disabled>
+                    Choose your comfort level
+                  </option>
+                  {DRINKS_ON_COURSE_OPTIONS.map((option) => (
+                    <option key={option.value} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="money_game_preference">Playing for money?</Label>
+                <select
+                  id="money_game_preference"
+                  value={formData.money_game_preference}
+                  onChange={(e) => setFormData({ ...formData, money_game_preference: e.target.value })}
+                  className="w-full px-3 py-2 rounded-lg border border-input bg-background"
+                  required
+                >
+                  <option value="" disabled>
+                    Select your comfort level
+                  </option>
+                  {MONEY_GAME_OPTIONS.map((option) => (
+                    <option key={option.value} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="distraction_tolerance">Talking while you swing?</Label>
+                <select
+                  id="distraction_tolerance"
+                  value={formData.distraction_tolerance}
+                  onChange={(e) => setFormData({ ...formData, distraction_tolerance: e.target.value })}
+                  className="w-full px-3 py-2 rounded-lg border border-input bg-background"
+                  required
+                >
+                  <option value="" disabled>
+                    How much chatter is okay?
+                  </option>
+                  {DISTRACTION_TOLERANCE_OPTIONS.map((option) => (
+                    <option key={option.value} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
             </CardContent>
           </Card>
 
@@ -492,7 +608,11 @@ export default function ProfileSetupPage() {
               !formData.preferred_round_time ||
               !formData.pace_of_play ||
               !formData.swing_tendency ||
-              !formData.group_preference
+              !formData.group_preference ||
+              !formData.business_talk_preference ||
+              !formData.drinks_on_course_preference ||
+              !formData.money_game_preference ||
+              !formData.distraction_tolerance
             }
           >
             {saving ? "Saving..." : "Complete Profile"}

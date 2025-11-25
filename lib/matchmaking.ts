@@ -9,6 +9,10 @@ export type CompatibilityBreakdownKey =
   | "frequency"
   | "swing"
   | "group"
+  | "conversation"
+  | "drinks"
+  | "stakes"
+  | "focus"
 
 export type Compatibility = {
   score: number
@@ -48,6 +52,10 @@ const BREAKDOWN_LABEL_MAP: Record<CompatibilityBreakdownKey, string> = {
   frequency: "Play frequency",
   swing: "Swing tendency",
   group: "Group preference",
+  conversation: "Business & politics",
+  drinks: "On-course drinks",
+  stakes: "Money games",
+  focus: "Distraction tolerance",
 }
 
 const clampScore = (value: number | null) => {
@@ -79,6 +87,28 @@ const overlapScore = (a?: string[] | null, b?: string[] | null): number | null =
   return overlap / unionSize
 }
 
+const preferenceMatchScore = (a?: string | null, b?: string | null, flexible?: string): number | null => {
+  if (!a || !b) {
+    return null
+  }
+
+  if (a === b) {
+    return 1
+  }
+
+  if (flexible && (a === flexible || b === flexible)) {
+    return 0.7
+  }
+
+  return 0.3
+}
+
+const DISTRACTION_TOLERANCE_ORDER: Record<string, number> = {
+  not_bothered: 0,
+  somewhat_distracted: 1,
+  easily_distracted: 2,
+}
+
 export const computeCompatibility = (self: any, other: any): Compatibility => {
   if (!self || !other) {
     return { score: 0, breakdown: {} }
@@ -103,7 +133,7 @@ export const computeCompatibility = (self: any, other: any): Compatibility => {
   const otherSkill = other?.skill_level ? SKILL_ORDER[other.skill_level] : undefined
   if (selfSkill !== undefined && otherSkill !== undefined) {
     const diff = Math.abs(selfSkill - otherSkill)
-    applyScore("skill", 1 - diff / 3, 0.18)
+    applyScore("skill", 1 - diff / 3, 0.16)
   }
 
   if (typeof self?.average_handicap === "number" && typeof other?.average_handicap === "number") {
@@ -111,13 +141,13 @@ export const computeCompatibility = (self: any, other: any): Compatibility => {
     applyScore("handicap", 1 - Math.min(diff, 20) / 20, 0.12)
   }
 
-  applyScore("interests", overlapScore(self?.interests, other?.interests), 0.12)
-  applyScore("goals", overlapScore(self?.match_goals, other?.match_goals), 0.18)
-  applyScore("traits", overlapScore(self?.personality_traits, other?.personality_traits), 0.15)
+  applyScore("interests", overlapScore(self?.interests, other?.interests), 0.11)
+  applyScore("goals", overlapScore(self?.match_goals, other?.match_goals), 0.16)
+  applyScore("traits", overlapScore(self?.personality_traits, other?.personality_traits), 0.13)
 
   if (self?.pace_of_play && other?.pace_of_play) {
     const paceScore = self.pace_of_play === other.pace_of_play ? 1 : 0.4
-    applyScore("pace", paceScore, 0.1)
+    applyScore("pace", paceScore, 0.08)
   }
 
   const selfRound = self?.preferred_round_time ? ROUND_TIME_ORDER[self.preferred_round_time] : undefined
@@ -132,7 +162,7 @@ export const computeCompatibility = (self: any, other: any): Compatibility => {
   const otherFreq = other?.play_frequency ? FREQUENCY_ORDER[other.play_frequency] : undefined
   if (selfFreq !== undefined && otherFreq !== undefined) {
     const diff = Math.abs(selfFreq - otherFreq)
-    applyScore("frequency", 1 - diff / 3, 0.05)
+    applyScore("frequency", 1 - diff / 3, 0.04)
   }
 
   if (self?.swing_tendency && other?.swing_tendency) {
@@ -153,6 +183,35 @@ export const computeCompatibility = (self: any, other: any): Compatibility => {
       groupScore = 1
     }
     applyScore("group", groupScore, 0.02)
+  }
+
+  applyScore(
+    "conversation",
+    preferenceMatchScore(self?.business_talk_preference, other?.business_talk_preference, "open"),
+    0.03,
+  )
+
+  applyScore(
+    "drinks",
+    preferenceMatchScore(self?.drinks_on_course_preference, other?.drinks_on_course_preference, "occasional"),
+    0.025,
+  )
+
+  applyScore(
+    "stakes",
+    preferenceMatchScore(self?.money_game_preference, other?.money_game_preference, "friendly"),
+    0.025,
+  )
+
+  if (self?.distraction_tolerance && other?.distraction_tolerance) {
+    const selfTolerance = DISTRACTION_TOLERANCE_ORDER[self.distraction_tolerance]
+    const otherTolerance = DISTRACTION_TOLERANCE_ORDER[other.distraction_tolerance]
+
+    if (selfTolerance !== undefined && otherTolerance !== undefined) {
+      const diff = Math.abs(selfTolerance - otherTolerance)
+      const focusScore = diff === 0 ? 1 : diff === 1 ? 0.6 : 0.2
+      applyScore("focus", focusScore, 0.02)
+    }
   }
 
   const normalized = weightTotal > 0 ? Math.round((weightedScore / weightTotal) * 100) : 0

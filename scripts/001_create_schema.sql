@@ -18,6 +18,10 @@ create table if not exists public.profiles (
   pace_of_play text,
   swing_tendency text,
   group_preference text,
+  business_talk_preference text,
+  drinks_on_course_preference text,
+  money_game_preference text,
+  distraction_tolerance text,
   trust_score integer default 100,
   total_rounds integer default 0,
   completed_rounds integer default 0,
@@ -43,6 +47,21 @@ alter table if exists public.profiles
 
 alter table if exists public.profiles
   add column if not exists swing_tendency text;
+
+alter table if exists public.profiles
+  add column if not exists group_preference text;
+
+alter table if exists public.profiles
+  add column if not exists business_talk_preference text;
+
+alter table if exists public.profiles
+  add column if not exists drinks_on_course_preference text;
+
+alter table if exists public.profiles
+  add column if not exists money_game_preference text;
+
+alter table if exists public.profiles
+  add column if not exists distraction_tolerance text;
 
 -- Courses table
 create table if not exists public.courses (

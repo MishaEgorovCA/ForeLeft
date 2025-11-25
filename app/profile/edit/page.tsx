@@ -30,6 +30,64 @@ const INTERESTS = [
   "Weekend Warrior",
 ]
 
+const PLAY_FREQUENCIES = [
+  { value: "multiple_per_week", label: "Multiple times per week" },
+  { value: "weekly", label: "Weekly" },
+  { value: "twice_per_month", label: "2-3 times per month" },
+  { value: "monthly", label: "Monthly" },
+]
+
+const ROUND_TIMES = [
+  { value: "dawn", label: "Dawn / first light" },
+  { value: "morning", label: "Morning" },
+  { value: "midday", label: "Midday" },
+  { value: "afternoon", label: "Afternoon" },
+  { value: "evening", label: "Twilight / evening" },
+]
+
+const PACE_OPTIONS = [
+  { value: "fast", label: "Fast (keep it moving)" },
+  { value: "steady", label: "Steady (comfortable pace)" },
+  { value: "relaxed", label: "Relaxed (take our time)" },
+]
+
+const SWING_TENDENCIES = [
+  { value: "left", label: "Miss left" },
+  { value: "straight", label: "Pretty straight" },
+  { value: "right", label: "Miss right" },
+]
+
+const GROUP_PREFERENCES = [
+  { value: "twosome", label: "Prefer twosomes" },
+  { value: "threesome", label: "Prefer threesomes" },
+  { value: "foursome", label: "Prefer foursomes" },
+  { value: "flexible", label: "Flexible on group size" },
+]
+
+const BUSINESS_TALK_OPTIONS = [
+  { value: "love_it", label: "Love discussing business & politics" },
+  { value: "open", label: "Open if others bring it up" },
+  { value: "avoid", label: "Prefer to avoid those topics" },
+]
+
+const DRINKS_ON_COURSE_OPTIONS = [
+  { value: "never", label: "Prefer to stay dry" },
+  { value: "occasional", label: "Open to a casual drink" },
+  { value: "always", label: "Enjoy having a few" },
+]
+
+const MONEY_GAME_OPTIONS = [
+  { value: "no_bets", label: "No money games" },
+  { value: "friendly", label: "Friendly low-stakes games" },
+  { value: "competitive", label: "Serious stakes welcome" },
+]
+
+const DISTRACTION_TOLERANCE_OPTIONS = [
+  { value: "not_bothered", label: "Hardly notice talking" },
+  { value: "somewhat_distracted", label: "Prefer some courtesy" },
+  { value: "easily_distracted", label: "Need quiet while swinging" },
+]
+
 export default function EditProfilePage() {
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
@@ -40,6 +98,15 @@ export default function EditProfilePage() {
     skill_level: "",
     average_handicap: "",
     interests: [] as string[],
+    business_talk_preference: "",
+    drinks_on_course_preference: "",
+    money_game_preference: "",
+    distraction_tolerance: "",
+    play_frequency: "",
+    preferred_round_time: "",
+    pace_of_play: "",
+    swing_tendency: "",
+    group_preference: "",
   })
   const router = useRouter()
   const supabase = createClient()
@@ -65,6 +132,15 @@ export default function EditProfilePage() {
           skill_level: profile.skill_level || "",
           average_handicap: profile.average_handicap?.toString() || "",
           interests: profile.interests || [],
+          business_talk_preference: profile.business_talk_preference || "",
+          drinks_on_course_preference: profile.drinks_on_course_preference || "",
+          money_game_preference: profile.money_game_preference || "",
+          distraction_tolerance: profile.distraction_tolerance || "",
+          play_frequency: profile.play_frequency || "",
+          preferred_round_time: profile.preferred_round_time || "",
+          pace_of_play: profile.pace_of_play || "",
+          swing_tendency: profile.swing_tendency || "",
+          group_preference: profile.group_preference || "",
         })
       }
 
@@ -98,6 +174,15 @@ export default function EditProfilePage() {
           skill_level: formData.skill_level,
           average_handicap: formData.average_handicap ? Number.parseFloat(formData.average_handicap) : null,
           interests: formData.interests,
+          business_talk_preference: formData.business_talk_preference,
+          drinks_on_course_preference: formData.drinks_on_course_preference,
+          money_game_preference: formData.money_game_preference,
+          distraction_tolerance: formData.distraction_tolerance,
+          play_frequency: formData.play_frequency,
+          preferred_round_time: formData.preferred_round_time,
+          pace_of_play: formData.pace_of_play,
+          swing_tendency: formData.swing_tendency,
+          group_preference: formData.group_preference,
           updated_at: new Date().toISOString(),
         })
         .eq("id", userId)
@@ -194,6 +279,176 @@ export default function EditProfilePage() {
                   onChange={(e) => setFormData({ ...formData, average_handicap: e.target.value })}
                   placeholder="e.g., 15.5"
                 />
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>Matchmaking Preferences</CardTitle>
+              <CardDescription>Fine-tune how you like to play</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="play_frequency">How often do you play?</Label>
+                <select
+                  id="play_frequency"
+                  value={formData.play_frequency}
+                  onChange={(e) => setFormData({ ...formData, play_frequency: e.target.value })}
+                  className="w-full px-3 py-2 rounded-lg border border-input bg-background"
+                  required
+                >
+                  <option value="">Select frequency</option>
+                  {PLAY_FREQUENCIES.map((option) => (
+                    <option key={option.value} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="preferred_round_time">Preferred tee time</Label>
+                <select
+                  id="preferred_round_time"
+                  value={formData.preferred_round_time}
+                  onChange={(e) => setFormData({ ...formData, preferred_round_time: e.target.value })}
+                  className="w-full px-3 py-2 rounded-lg border border-input bg-background"
+                  required
+                >
+                  <option value="">Select time of day</option>
+                  {ROUND_TIMES.map((option) => (
+                    <option key={option.value} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="pace_of_play">Preferred pace</Label>
+                <select
+                  id="pace_of_play"
+                  value={formData.pace_of_play}
+                  onChange={(e) => setFormData({ ...formData, pace_of_play: e.target.value })}
+                  className="w-full px-3 py-2 rounded-lg border border-input bg-background"
+                  required
+                >
+                  <option value="">Select pace of play</option>
+                  {PACE_OPTIONS.map((option) => (
+                    <option key={option.value} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="swing_tendency">Swing tendency</Label>
+                <select
+                  id="swing_tendency"
+                  value={formData.swing_tendency}
+                  onChange={(e) => setFormData({ ...formData, swing_tendency: e.target.value })}
+                  className="w-full px-3 py-2 rounded-lg border border-input bg-background"
+                  required
+                >
+                  <option value="">Select your usual miss</option>
+                  {SWING_TENDENCIES.map((option) => (
+                    <option key={option.value} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="group_preference">Preferred group size</Label>
+                <select
+                  id="group_preference"
+                  value={formData.group_preference}
+                  onChange={(e) => setFormData({ ...formData, group_preference: e.target.value })}
+                  className="w-full px-3 py-2 rounded-lg border border-input bg-background"
+                  required
+                >
+                  <option value="">Select group size</option>
+                  {GROUP_PREFERENCES.map((option) => (
+                    <option key={option.value} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="business_talk_preference">Business & politics chat?</Label>
+                <select
+                  id="business_talk_preference"
+                  value={formData.business_talk_preference}
+                  onChange={(e) => setFormData({ ...formData, business_talk_preference: e.target.value })}
+                  className="w-full px-3 py-2 rounded-lg border border-input bg-background"
+                  required
+                >
+                  <option value="">Choose what feels right</option>
+                  {BUSINESS_TALK_OPTIONS.map((option) => (
+                    <option key={option.value} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="drinks_on_course_preference">Enjoy beverages while playing?</Label>
+                <select
+                  id="drinks_on_course_preference"
+                  value={formData.drinks_on_course_preference}
+                  onChange={(e) => setFormData({ ...formData, drinks_on_course_preference: e.target.value })}
+                  className="w-full px-3 py-2 rounded-lg border border-input bg-background"
+                  required
+                >
+                  <option value="">Choose your comfort level</option>
+                  {DRINKS_ON_COURSE_OPTIONS.map((option) => (
+                    <option key={option.value} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="money_game_preference">Playing for money?</Label>
+                <select
+                  id="money_game_preference"
+                  value={formData.money_game_preference}
+                  onChange={(e) => setFormData({ ...formData, money_game_preference: e.target.value })}
+                  className="w-full px-3 py-2 rounded-lg border border-input bg-background"
+                  required
+                >
+                  <option value="">Select your comfort level</option>
+                  {MONEY_GAME_OPTIONS.map((option) => (
+                    <option key={option.value} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="distraction_tolerance">Talking while you swing?</Label>
+                <select
+                  id="distraction_tolerance"
+                  value={formData.distraction_tolerance}
+                  onChange={(e) => setFormData({ ...formData, distraction_tolerance: e.target.value })}
+                  className="w-full px-3 py-2 rounded-lg border border-input bg-background"
+                  required
+                >
+                  <option value="">How much chatter is okay?</option>
+                  {DISTRACTION_TOLERANCE_OPTIONS.map((option) => (
+                    <option key={option.value} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
+                </select>
               </div>
             </CardContent>
           </Card>

@@ -7,6 +7,7 @@ import { MobileNav } from "@/components/mobile-nav"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import Link from "next/link"
+import { formatLabel } from "@/lib/matchmaking"
 
 export default function ProfilePage() {
   const router = useRouter()
@@ -128,6 +129,69 @@ export default function ProfilePage() {
                     </span>
                   ))}
                 </div>
+              </div>
+            )}
+            {(profile?.play_frequency || profile?.preferred_round_time || profile?.pace_of_play || profile?.swing_tendency ||
+              profile?.group_preference || profile?.business_talk_preference || profile?.drinks_on_course_preference ||
+              profile?.money_game_preference || profile?.distraction_tolerance) && (
+              <div>
+                <div className="text-sm font-medium text-muted-foreground mb-2">On-course preferences</div>
+                <dl className="space-y-2 text-sm">
+                  {profile?.play_frequency && (
+                    <div className="flex items-center justify-between gap-4">
+                      <dt className="text-muted-foreground">Play frequency</dt>
+                      <dd className="font-medium text-right">{formatLabel(profile.play_frequency)}</dd>
+                    </div>
+                  )}
+                  {profile?.preferred_round_time && (
+                    <div className="flex items-center justify-between gap-4">
+                      <dt className="text-muted-foreground">Tee time</dt>
+                      <dd className="font-medium text-right">{formatLabel(profile.preferred_round_time)}</dd>
+                    </div>
+                  )}
+                  {profile?.pace_of_play && (
+                    <div className="flex items-center justify-between gap-4">
+                      <dt className="text-muted-foreground">Pace</dt>
+                      <dd className="font-medium text-right">{formatLabel(profile.pace_of_play)}</dd>
+                    </div>
+                  )}
+                  {profile?.swing_tendency && (
+                    <div className="flex items-center justify-between gap-4">
+                      <dt className="text-muted-foreground">Swing tendency</dt>
+                      <dd className="font-medium text-right">{formatLabel(profile.swing_tendency)}</dd>
+                    </div>
+                  )}
+                  {profile?.group_preference && (
+                    <div className="flex items-center justify-between gap-4">
+                      <dt className="text-muted-foreground">Group size</dt>
+                      <dd className="font-medium text-right">{formatLabel(profile.group_preference)}</dd>
+                    </div>
+                  )}
+                  {profile?.business_talk_preference && (
+                    <div className="flex items-center justify-between gap-4">
+                      <dt className="text-muted-foreground">Business & politics</dt>
+                      <dd className="font-medium text-right">{formatLabel(profile.business_talk_preference)}</dd>
+                    </div>
+                  )}
+                  {profile?.drinks_on_course_preference && (
+                    <div className="flex items-center justify-between gap-4">
+                      <dt className="text-muted-foreground">On-course drinks</dt>
+                      <dd className="font-medium text-right">{formatLabel(profile.drinks_on_course_preference)}</dd>
+                    </div>
+                  )}
+                  {profile?.money_game_preference && (
+                    <div className="flex items-center justify-between gap-4">
+                      <dt className="text-muted-foreground">Money games</dt>
+                      <dd className="font-medium text-right">{formatLabel(profile.money_game_preference)}</dd>
+                    </div>
+                  )}
+                  {profile?.distraction_tolerance && (
+                    <div className="flex items-center justify-between gap-4">
+                      <dt className="text-muted-foreground">Distraction tolerance</dt>
+                      <dd className="font-medium text-right">{formatLabel(profile.distraction_tolerance)}</dd>
+                    </div>
+                  )}
+                </dl>
               </div>
             )}
           </CardContent>
