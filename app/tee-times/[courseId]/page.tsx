@@ -30,6 +30,8 @@ export default function CourseDetailPage() {
   const [loading, setLoading] = useState(true)
   const [loadError, setLoadError] = useState<string | null>(null)
   const lastCandidateRef = useRef<string | null>(null)
+  const userIdRef = useRef<string>("")
+  const profileRef = useRef<any>(null)
 
   const selectedDate = searchParams.get("date") || new Date().toISOString().split("T")[0]
 
@@ -60,8 +62,8 @@ export default function CourseDetailPage() {
 
   const refreshMatchmaking = useCallback(
     async (profileOverride?: any, userIdOverride?: string) => {
-      const activeProfile = profileOverride ?? currentProfile
-      const activeUserId = userIdOverride ?? currentUserId
+      const activeProfile = profileOverride ?? profileRef.current
+      const activeUserId = userIdOverride ?? userIdRef.current
 
       if (!activeProfile || !activeUserId) {
         return
@@ -121,16 +123,22 @@ export default function CourseDetailPage() {
         setSelectedCandidateIndex(0)
       }
     },
-    [supabase, courseId, selectedDate, currentProfile, currentUserId],
+    [supabase, courseId, selectedDate],
   )
 
   useEffect(() => {
+    setCourse(null)
+    setTeeTimes([])
+    setQueueEntry(null)
+    setMatchCandidates([])
+    setLoading(true)
+    setLoadError(null)
+    userIdRef.current = ""
+    profileRef.current = null
+
     let isMounted = true
 
     async function loadData() {
-      setLoading(true)
-      setLoadError(null)
-
       try {
         const {
           data: { user },
@@ -147,6 +155,7 @@ export default function CourseDetailPage() {
         }
 
         setCurrentUserId(user.id)
+        userIdRef.current = user.id
 
         const [courseResponse, teeTimesResponse, profileResponse] = await Promise.all([
           supabase.from("courses").select("*").eq("id", courseId).single(),
@@ -183,13 +192,12 @@ export default function CourseDetailPage() {
           setLoadError(profileResponse.error.message)
         }
         setCurrentProfile(profileResponse.data)
+        profileRef.current = profileResponse.data
 
         await refreshMatchmaking(profileResponse.data, user.id)
       } catch (error: any) {
         console.error("Failed to load course detail", error)
-        if (!loadError) {
-          setLoadError(error?.message || "Unable to load this course right now.")
-        }
+        setLoadError((prev: string | null) => prev ?? error?.message ?? "Unable to load this course right now.")
       } finally {
         if (isMounted) {
           setLoading(false)
@@ -302,7 +310,7 @@ export default function CourseDetailPage() {
         throw error
       }
 
-      await refreshMatchmaking(undefined, user.id)
+      await refreshMatchmaking(profileRef.current, user.id)
       setMatchmakingNotice("We're searching for the best partners at this course.")
     } catch (err: any) {
       console.error("Failed to start matchmaking", err)
@@ -349,7 +357,7 @@ export default function CourseDetailPage() {
       return
     }
 
-    setSelectedCandidateIndex((prev) => (prev + 1) % matchCandidates.length)
+    setSelectedCandidateIndex((prev: number) => (prev + 1) % matchCandidates.length)
     setMatchmakingNotice("Still searching - we'll keep looking for an even better fit.")
   }
 
