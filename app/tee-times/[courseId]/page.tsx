@@ -28,6 +28,7 @@ export default function CourseDetailPage() {
   const [matchmakingError, setMatchmakingError] = useState<string | null>(null)
   const [matchmakingNotice, setMatchmakingNotice] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
+  const [loadError, setLoadError] = useState<string | null>(null)
   const lastCandidateRef = useRef<string | null>(null)
 
   const selectedDate = searchParams.get("date") || new Date().toISOString().split("T")[0]
@@ -128,46 +129,71 @@ export default function CourseDetailPage() {
 
     async function loadData() {
       setLoading(true)
+      setLoadError(null)
 
-      const {
-        data: { user },
-      } = await supabase.auth.getUser()
+      try {
+        const {
+          data: { user },
+          error: authError,
+        } = await supabase.auth.getUser()
 
-      if (!user) {
-        router.push("/auth/login")
-        return
-      }
+        if (authError) {
+          throw authError
+        }
 
-      setCurrentUserId(user.id)
+        if (!user) {
+          router.push("/auth/login")
+          return
+        }
 
-      const [courseResponse, teeTimesResponse, profileResponse] = await Promise.all([
-        supabase.from("courses").select("*").eq("id", courseId).single(),
-        supabase
-          .from("tee_times")
-          .select("*")
-          .eq("course_id", courseId)
-          .eq("date", selectedDate)
-          .order("time"),
-        supabase.from("profiles").select("*").eq("id", user.id).single(),
-      ])
+        setCurrentUserId(user.id)
 
-      if (!courseResponse.data) {
-        router.push("/tee-times")
-        return
-      }
+        const [courseResponse, teeTimesResponse, profileResponse] = await Promise.all([
+          supabase.from("courses").select("*").eq("id", courseId).single(),
+          supabase
+            .from("tee_times")
+            .select("*")
+            .eq("course_id", courseId)
+            .eq("date", selectedDate)
+            .order("time"),
+          supabase.from("profiles").select("*").eq("id", user.id).single(),
+        ])
 
-      if (!isMounted) {
-        return
-      }
+        if (courseResponse.error) {
+          throw courseResponse.error
+        }
 
-      setCourse(courseResponse.data)
-      setTeeTimes(teeTimesResponse.data || [])
-      setCurrentProfile(profileResponse.data)
+        if (!courseResponse.data) {
+          router.push("/tee-times")
+          return
+        }
 
-      await refreshMatchmaking(profileResponse.data, user.id)
+        if (!isMounted) {
+          return
+        }
 
-      if (isMounted) {
-        setLoading(false)
+        setCourse(courseResponse.data)
+
+        if (teeTimesResponse.error) {
+          setLoadError(teeTimesResponse.error.message)
+        }
+        setTeeTimes(teeTimesResponse.data || [])
+
+        if (profileResponse.error) {
+          setLoadError(profileResponse.error.message)
+        }
+        setCurrentProfile(profileResponse.data)
+
+        await refreshMatchmaking(profileResponse.data, user.id)
+      } catch (error: any) {
+        console.error("Failed to load course detail", error)
+        if (!loadError) {
+          setLoadError(error?.message || "Unable to load this course right now.")
+        }
+      } finally {
+        if (isMounted) {
+          setLoading(false)
+        }
       }
     }
 
@@ -224,7 +250,7 @@ export default function CourseDetailPage() {
           table: "course_match_queue",
           filter: `course_id=eq.${courseId}`,
         },
-        (payload) => {
+        (payload: { new: Record<string, any> | null; old: Record<string, any> | null }) => {
           const next = payload.new as { play_date?: string } | null
           const prev = payload.old as { play_date?: string } | null
 
@@ -411,6 +437,27 @@ export default function CourseDetailPage() {
     )
   }
 
+  if (loadError && !course) {
+    return (
+      <div className="min-h-svh pb-20 bg-background flex items-center justify-center px-4">
+        <div className="max-w-md space-y-4 text-center">
+          <div className="space-y-2">
+            <h1 className="text-xl font-semibold">We couldn't load this course</h1>
+            <p className="text-sm text-muted-foreground">{loadError}</p>
+          </div>
+          <div className="flex flex-col gap-2 sm:flex-row sm:justify-center">
+            <Button onClick={() => router.refresh()} className="sm:w-auto">
+              Try Again
+            </Button>
+            <Button asChild variant="outline" className="sm:w-auto">
+              <Link href="/tee-times">Back to Tee Times</Link>
+            </Button>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
   if (!course) {
     return null
   }
@@ -430,6 +477,11 @@ export default function CourseDetailPage() {
 
         {/* Course Header */}
         <div className="space-y-4">
+          {loadError && (
+            <div className="rounded-lg border border-amber-300/40 bg-amber-200/10 px-4 py-3 text-sm text-amber-900">
+              We hit a snag loading a few details: {loadError}
+            </div>
+          )}
           <div className="aspect-video w-full rounded-lg overflow-hidden bg-gradient-to-br from-primary/20 to-secondary/20">
             <img
               src={course.image_url || "/placeholder.svg?height=400&width=800&query=golf course"}
