@@ -148,6 +148,7 @@ create table if not exists public.course_match_queue (
   play_date date not null,
   tee_time_id uuid references public.tee_times(id) on delete set null,
   status text check (status in ('searching', 'matched', 'cancelled')) default 'searching',
+  group_size integer default 1 check (group_size between 1 and 4),
   paired_user_id uuid references public.profiles(id) on delete set null,
   match_id uuid references public.matches(id) on delete set null,
   created_at timestamptz default now(),
@@ -160,6 +161,8 @@ alter table if exists public.course_match_queue
 
 alter table if exists public.course_match_queue
   add column if not exists status text;
+
+drop policy if exists "Anyone can view searching course queue" on public.course_match_queue;
 
 alter table if exists public.course_match_queue
   alter column status type text
@@ -190,6 +193,29 @@ alter table if exists public.course_match_queue
 
 alter table if exists public.course_match_queue
   add column if not exists updated_at timestamptz default now();
+
+alter table if exists public.course_match_queue
+  add column if not exists group_size integer default 1;
+
+alter table if exists public.course_match_queue
+  alter column group_size set default 1;
+
+alter table if exists public.course_match_queue
+  alter column group_size set not null;
+
+do $$
+begin
+  if not exists (
+    select 1
+    from pg_constraint
+    where conname = 'course_match_queue_group_size_check'
+      and conrelid = 'public.course_match_queue'::regclass
+  ) then
+    alter table public.course_match_queue
+      add constraint course_match_queue_group_size_check
+      check (group_size between 1 and 4);
+  end if;
+end $$;
 
 -- Groups table
 create table if not exists public.groups (
@@ -310,7 +336,6 @@ create policy "Users can update their matches"
   on public.matches for update
   using (auth.uid() = requester_id or auth.uid() = matched_user_id);
 
-drop policy if exists "Anyone can view searching course queue" on public.course_match_queue;
 create policy "Anyone can view searching course queue"
   on public.course_match_queue for select
   using (status = 'searching' or auth.uid() = user_id);

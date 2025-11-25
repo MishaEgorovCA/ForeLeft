@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useMemo, useState } from "react"
+import { useCallback, useEffect, useMemo, useState } from "react"
 import type { ChangeEvent } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 import Link from "next/link"
@@ -18,14 +18,18 @@ type SpotlightBreakdownItem = {
   value: number
 }
 
+const MATCHES_TAB_KEYS = new Set<string>(["discover", "requests", "matches", "queues"])
+
 export default function MatchesPage() {
   const router = useRouter()
   const searchParams = useSearchParams()
+  const supabase = useMemo(() => createClient(), [])
   const [currentUserId, setCurrentUserId] = useState<string>("")
   const [potentialMatches, setPotentialMatches] = useState<any[]>([])
   const [incomingRequests, setIncomingRequests] = useState<any[]>([])
   const [outgoingRequests, setOutgoingRequests] = useState<any[]>([])
   const [acceptedMatches, setAcceptedMatches] = useState<any[]>([])
+  const [queueEntries, setQueueEntries] = useState<any[]>([])
   const [allInterests, setAllInterests] = useState<Set<string>>(new Set())
   const [loading, setLoading] = useState(true)
   const [activeIndex, setActiveIndex] = useState(0)
@@ -33,7 +37,138 @@ export default function MatchesPage() {
 
   const selectedSkill = searchParams.get("skill") || "all"
   const selectedInterest = searchParams.get("interest") || "all"
-  const selectedTab = searchParams.get("tab") || "discover"
+  const rawTab = searchParams.get("tab") || "discover"
+  const selectedTab = MATCHES_TAB_KEYS.has(rawTab) ? rawTab : "discover"
+
+  const fetchQueueEntries = useCallback(
+    async (userId: string) => {
+      const { data, error } = await supabase
+        .from("course_match_queue")
+        .select(
+          `*,
+          course:courses (
+            id,
+            name,
+            city,
+            province
+          )
+        `,
+        )
+        .eq("user_id", userId)
+        .order("updated_at", { ascending: false })
+
+      if (error) {
+        console.error("Failed to load queue entries", error)
+        return
+      }
+
+      setQueueEntries(data || [])
+    },
+    [supabase],
+  )
+
+  const fetchMatchStatus = useCallback(
+    async (userId: string) => {
+      const { data: incomingData, error: incomingError } = await supabase
+        .from("matches")
+        .select(`
+          *,
+          profiles!matches_requester_id_fkey (display_name, skill_level, avatar_url, interests, trust_score)
+        `)
+        .eq("matched_user_id", userId)
+        .eq("status", "pending")
+        .order("created_at", { ascending: false })
+
+      if (incomingError) {
+        console.error("Failed to load incoming match requests", incomingError)
+      }
+
+      setIncomingRequests(incomingData || [])
+
+      const { data: outgoingData, error: outgoingError } = await supabase
+        .from("matches")
+        .select(`
+          *,
+          profiles!matches_matched_user_id_fkey (display_name, skill_level, avatar_url, interests, trust_score)
+        `)
+        .eq("requester_id", userId)
+        .eq("status", "pending")
+        .order("created_at", { ascending: false })
+
+      if (outgoingError) {
+        console.error("Failed to load outgoing match requests", outgoingError)
+      }
+
+      setOutgoingRequests(outgoingData || [])
+
+      const { data: acceptedData, error: acceptedError } = await supabase
+        .from("matches")
+        .select(`
+          *,
+          requester:profiles!matches_requester_id_fkey (display_name, skill_level, avatar_url, interests),
+          matched:profiles!matches_matched_user_id_fkey (display_name, skill_level, avatar_url, interests)
+        `)
+        .or(`requester_id.eq.${userId},matched_user_id.eq.${userId}`)
+        .eq("status", "accepted")
+        .order("created_at", { ascending: false })
+        .limit(10)
+
+      if (acceptedError) {
+        console.error("Failed to load accepted matches", acceptedError)
+      }
+
+      setAcceptedMatches(acceptedData || [])
+    },
+    [supabase],
+  )
+
+  const fetchPotentialMatches = useCallback(
+    async (userId: string) => {
+      const { data: currentProfileData } = await supabase.from("profiles").select("*").eq("id", userId).single()
+
+      let matchesQuery = supabase
+        .from("profiles")
+        .select("*")
+        .neq("id", userId)
+        .not("skill_level", "is", null)
+        .order("trust_score", { ascending: false })
+
+      if (selectedSkill !== "all") {
+        matchesQuery = matchesQuery.eq("skill_level", selectedSkill)
+      }
+
+      const { data: matchesData, error: matchesError } = await matchesQuery
+
+      if (matchesError) {
+        console.error("Failed to load potential matches", matchesError)
+        setPotentialMatches([])
+        setAllInterests(new Set())
+        return
+      }
+
+      let filteredMatches = matchesData || []
+      if (selectedInterest !== "all" && filteredMatches.length > 0) {
+        filteredMatches = filteredMatches.filter((profile: any) => profile.interests?.includes(selectedInterest))
+      }
+
+      const enrichedMatches = filteredMatches.map((profile: any) => ({
+        ...profile,
+        compatibility: computeCompatibility(currentProfileData, profile),
+      }))
+
+      enrichedMatches.sort((a: any, b: any) => (b.compatibility?.score || 0) - (a.compatibility?.score || 0))
+
+      setPotentialMatches(enrichedMatches)
+      setActiveIndex(0)
+
+      const interests = new Set<string>()
+      matchesData?.forEach((profile: any) => {
+        profile.interests?.forEach((interest: string) => interests.add(interest))
+      })
+      setAllInterests(interests)
+    },
+    [supabase, selectedSkill, selectedInterest],
+  )
 
   const pushWithParams = (params: URLSearchParams) => {
     const query = params.toString()
@@ -41,6 +176,9 @@ export default function MatchesPage() {
   }
 
   const handleTabChange = (value: string) => {
+    if (!MATCHES_TAB_KEYS.has(value)) {
+      return
+    }
     const params = new URLSearchParams(searchParams.toString())
     if (value === "discover") {
       params.delete("tab")
@@ -87,8 +225,10 @@ export default function MatchesPage() {
   }, [activeMatch])
 
   useEffect(() => {
-    async function loadData() {
-      const supabase = createClient()
+    let isMounted = true
+
+    const loadData = async () => {
+      setLoading(true)
 
       const {
         data: { user },
@@ -99,93 +239,80 @@ export default function MatchesPage() {
         return
       }
 
+      if (!isMounted) {
+        return
+      }
+
       setCurrentUserId(user.id)
 
-  const { data: currentProfileData } = await supabase.from("profiles").select("*").eq("id", user.id).single()
+      await Promise.all([fetchPotentialMatches(user.id), fetchMatchStatus(user.id), fetchQueueEntries(user.id)])
 
-      // Get potential matches (exclude current user)
-      let matchesQuery = supabase
-        .from("profiles")
-        .select("*")
-        .neq("id", user.id)
-        .not("skill_level", "is", null)
-        .order("trust_score", { ascending: false })
-
-      if (selectedSkill !== "all") {
-        matchesQuery = matchesQuery.eq("skill_level", selectedSkill)
+      if (isMounted) {
+        setLoading(false)
       }
-
-    const { data: matchesData } = await matchesQuery
-
-      // Filter by interest if selected
-      let filteredMatches = matchesData || []
-      if (selectedInterest !== "all" && filteredMatches.length > 0) {
-        filteredMatches = filteredMatches.filter((profile: any) => profile.interests?.includes(selectedInterest))
-      }
-
-      const enrichedMatches = filteredMatches.map((profile: any) => ({
-        ...profile,
-        compatibility: computeCompatibility(currentProfileData, profile),
-      }))
-
-      enrichedMatches.sort((a: any, b: any) => (b.compatibility?.score || 0) - (a.compatibility?.score || 0))
-
-      setPotentialMatches(enrichedMatches)
-      setActiveIndex(0)
-
-      // Get all unique interests for filter
-      const interests = new Set<string>()
-      matchesData?.forEach((profile: any) => {
-        profile.interests?.forEach((interest: string) => interests.add(interest))
-      })
-      setAllInterests(interests)
-
-      // Get incoming match requests
-      const { data: incomingData } = await supabase
-        .from("matches")
-        .select(`
-          *,
-          profiles!matches_requester_id_fkey (display_name, skill_level, avatar_url, interests, trust_score)
-        `)
-        .eq("matched_user_id", user.id)
-        .eq("status", "pending")
-        .order("created_at", { ascending: false })
-
-      setIncomingRequests(incomingData || [])
-
-      // Get outgoing match requests
-      const { data: outgoingData } = await supabase
-        .from("matches")
-        .select(`
-          *,
-          profiles!matches_matched_user_id_fkey (display_name, skill_level, avatar_url, interests, trust_score)
-        `)
-        .eq("requester_id", user.id)
-        .eq("status", "pending")
-        .order("created_at", { ascending: false })
-
-      setOutgoingRequests(outgoingData || [])
-
-      // Get accepted matches
-      const { data: acceptedData } = await supabase
-        .from("matches")
-        .select(`
-          *,
-          requester:profiles!matches_requester_id_fkey (display_name, skill_level, avatar_url, interests),
-          matched:profiles!matches_matched_user_id_fkey (display_name, skill_level, avatar_url, interests)
-        `)
-        .or(`requester_id.eq.${user.id},matched_user_id.eq.${user.id}`)
-        .eq("status", "accepted")
-        .order("created_at", { ascending: false })
-        .limit(10)
-
-      setAcceptedMatches(acceptedData || [])
-
-      setLoading(false)
     }
 
     loadData()
-  }, [router, selectedSkill, selectedInterest])
+
+    return () => {
+      isMounted = false
+    }
+  }, [router, supabase, fetchPotentialMatches, fetchMatchStatus, fetchQueueEntries])
+
+  useEffect(() => {
+    if (!currentUserId) {
+      return
+    }
+
+    const queueChannel = supabase
+      .channel(`match-queues-${currentUserId}`)
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "course_match_queue",
+          filter: `user_id=eq.${currentUserId}`,
+        },
+        () => {
+          fetchQueueEntries(currentUserId).catch((error) => console.error("Queue refresh failed", error))
+        },
+      )
+      .subscribe()
+
+    const matchesChannel = supabase
+      .channel(`match-status-${currentUserId}`)
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "matches",
+          filter: `requester_id=eq.${currentUserId}`,
+        },
+        () => {
+          fetchMatchStatus(currentUserId).catch((error) => console.error("Match refresh failed", error))
+        },
+      )
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "matches",
+          filter: `matched_user_id=eq.${currentUserId}`,
+        },
+        () => {
+          fetchMatchStatus(currentUserId).catch((error) => console.error("Match refresh failed", error))
+        },
+      )
+      .subscribe()
+
+    return () => {
+      supabase.removeChannel(queueChannel)
+      supabase.removeChannel(matchesChannel)
+    }
+  }, [supabase, currentUserId, fetchQueueEntries, fetchMatchStatus])
 
   const handleSkillChange = (skill: string) => {
     const params = new URLSearchParams(searchParams.toString())
@@ -229,7 +356,7 @@ export default function MatchesPage() {
 
         {/* Tabs */}
         <Tabs value={selectedTab} onValueChange={handleTabChange} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-3">
+          <TabsList className="grid w-full grid-cols-4">
             <TabsTrigger value="discover">Discover</TabsTrigger>
             <TabsTrigger value="requests">
               Requests
@@ -240,6 +367,14 @@ export default function MatchesPage() {
               )}
             </TabsTrigger>
             <TabsTrigger value="matches">Matches</TabsTrigger>
+            <TabsTrigger value="queues">
+              Queues
+              {queueEntries.length > 0 && (
+                <span className="ml-2 px-2 py-0.5 rounded-full bg-primary text-primary-foreground text-xs">
+                  {queueEntries.length}
+                </span>
+              )}
+            </TabsTrigger>
           </TabsList>
 
           {/* Discover Tab */}
@@ -601,6 +736,82 @@ export default function MatchesPage() {
                 ) : (
                   <div className="py-8 text-center text-muted-foreground">
                     No matches yet. Start connecting with other golfers!
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Queues Tab */}
+          <TabsContent value="queues" className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle>Your Course Queues</CardTitle>
+                <CardDescription>Track where you're waiting to be paired</CardDescription>
+              </CardHeader>
+              <CardContent>
+                {queueEntries.length > 0 ? (
+                  <div className="space-y-3">
+                    {queueEntries.map((entry: any) => {
+                      const course = entry.course
+                      const groupSize = Math.min(4, Math.max(1, entry.group_size ?? 1))
+                      const playersNeeded = Math.max(0, 4 - groupSize)
+                      const status = (entry.status || "searching") as string
+                      const statusLabel = status.charAt(0).toUpperCase() + status.slice(1)
+                      const playDate = entry.play_date
+                        ? new Date(entry.play_date).toLocaleDateString("en-US", {
+                            weekday: "short",
+                            month: "short",
+                            day: "numeric",
+                          })
+                        : "Any date"
+                      const updatedAt = entry.updated_at
+                        ? new Date(entry.updated_at).toLocaleString("en-US", {
+                            month: "short",
+                            day: "numeric",
+                            hour: "numeric",
+                            minute: "2-digit",
+                          })
+                        : ""
+
+                      return (
+                        <div
+                          key={entry.id}
+                          className="flex flex-col gap-3 rounded-lg border border-border bg-muted/30 p-4 md:flex-row md:items-center md:justify-between"
+                        >
+                          <div>
+                            <div className="flex flex-wrap items-center gap-2 text-sm font-medium">
+                              <span>{course?.name ?? "Course unavailable"}</span>
+                              <span className="rounded-full border border-border px-2 py-0.5 text-xs uppercase tracking-wide">
+                                {statusLabel}
+                              </span>
+                            </div>
+                            <div className="text-sm text-muted-foreground">
+                              {course?.city && course?.province
+                                ? `${course.city}, ${course.province}`
+                                : "Location pending"}
+                            </div>
+                            <div className="mt-1 text-xs text-muted-foreground">
+                              {playDate} • Group of {groupSize} • {playersNeeded === 0 ? "Foursome full" : `Need ${playersNeeded} more`}
+                            </div>
+                            {updatedAt && (
+                              <div className="text-xs text-muted-foreground">Updated {updatedAt}</div>
+                            )}
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <Button asChild size="sm" variant="outline">
+                              <Link href={`/tee-times/${entry.course_id}?date=${entry.play_date ?? ""}`}>
+                                View Course
+                              </Link>
+                            </Button>
+                          </div>
+                        </div>
+                      )
+                    })}
+                  </div>
+                ) : (
+                  <div className="py-8 text-center text-muted-foreground">
+                    You're not in any course queues right now.
                   </div>
                 )}
               </CardContent>

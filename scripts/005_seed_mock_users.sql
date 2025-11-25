@@ -450,21 +450,25 @@ INSERT INTO public.profiles (
     WITH queue_seed AS (
       SELECT '11111111-1111-1111-1111-111111111111'::uuid AS user_id,
         'Furry Creek Golf & Country Club'::text AS course_name,
-        3 AS days_ahead
+        3 AS days_ahead,
+        1 AS group_size
       UNION ALL
       SELECT '22222222-2222-2222-2222-222222222222'::uuid,
         'Mayfair Lakes Golf & Country Club',
-        5
+        5,
+        2
       UNION ALL
       SELECT '33333333-3333-3333-3333-333333333333'::uuid,
         'Northlands Golf Course',
-        4
+        4,
+        3
     )
-    INSERT INTO public.course_match_queue (user_id, course_id, play_date, status, tee_time_id, paired_user_id, match_id, created_at, updated_at)
+    INSERT INTO public.course_match_queue (user_id, course_id, play_date, status, group_size, tee_time_id, paired_user_id, match_id, created_at, updated_at)
     SELECT qs.user_id,
       c.id,
       current_date + qs.days_ahead,
       'searching',
+      qs.group_size,
       null,
       null,
       null,
@@ -474,6 +478,7 @@ INSERT INTO public.profiles (
     JOIN public.courses c ON c.name = qs.course_name
     ON CONFLICT (user_id, course_id, play_date) DO UPDATE
     SET status = excluded.status,
+        group_size = excluded.group_size,
         tee_time_id = null,
         paired_user_id = null,
         match_id = null,

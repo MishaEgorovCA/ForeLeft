@@ -5,7 +5,7 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
 }
 
-export const APP_VERSION = '0.4.0'
+export const APP_VERSION = '0.5.0'
 
 export const isProfileComplete = (profile: Record<string, any> | null | undefined) => {
   if (!profile) {
