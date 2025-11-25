@@ -140,6 +140,57 @@ create table if not exists public.matches (
   updated_at timestamptz default now()
 );
 
+-- Course matchmaking queue tracks players looking for partners at specific courses
+create table if not exists public.course_match_queue (
+  id uuid primary key default uuid_generate_v4(),
+  user_id uuid references public.profiles(id) on delete cascade,
+  course_id uuid references public.courses(id) on delete cascade,
+  play_date date not null,
+  tee_time_id uuid references public.tee_times(id) on delete set null,
+  status text check (status in ('searching', 'matched', 'cancelled')) default 'searching',
+  paired_user_id uuid references public.profiles(id) on delete set null,
+  match_id uuid references public.matches(id) on delete set null,
+  created_at timestamptz default now(),
+  updated_at timestamptz default now(),
+  unique(user_id, course_id, play_date)
+);
+
+alter table if exists public.course_match_queue
+  add column if not exists tee_time_id uuid references public.tee_times(id) on delete set null;
+
+alter table if exists public.course_match_queue
+  add column if not exists status text;
+
+alter table if exists public.course_match_queue
+  alter column status type text
+  using status::text;
+
+alter table if exists public.course_match_queue
+  alter column status set default 'searching';
+
+do $$
+begin
+  if to_regclass('public.course_match_queue') is not null then
+    alter table public.course_match_queue drop constraint if exists course_match_queue_status_check;
+  end if;
+end $$;
+
+alter table if exists public.course_match_queue
+  add constraint course_match_queue_status_check
+  check (status in ('searching', 'matched', 'cancelled'));
+
+alter table if exists public.course_match_queue
+  add column if not exists paired_user_id uuid references public.profiles(id) on delete set null;
+
+alter table if exists public.course_match_queue
+  add column if not exists match_id uuid references public.matches(id) on delete set null;
+
+alter table if exists public.course_match_queue
+  add column if not exists created_at timestamptz default now();
+
+alter table if exists public.course_match_queue
+  add column if not exists updated_at timestamptz default now();
+
 -- Groups table
 create table if not exists public.groups (
   id uuid primary key default uuid_generate_v4(),
@@ -183,6 +234,7 @@ alter table public.tee_times enable row level security;
 alter table public.bookings enable row level security;
 alter table public.user_handicaps enable row level security;
 alter table public.matches enable row level security;
+alter table public.course_match_queue enable row level security;
 alter table public.groups enable row level security;
 alter table public.group_members enable row level security;
 alter table public.messages enable row level security;
@@ -258,6 +310,27 @@ create policy "Users can update their matches"
   on public.matches for update
   using (auth.uid() = requester_id or auth.uid() = matched_user_id);
 
+drop policy if exists "Anyone can view searching course queue" on public.course_match_queue;
+create policy "Anyone can view searching course queue"
+  on public.course_match_queue for select
+  using (status = 'searching' or auth.uid() = user_id);
+
+drop policy if exists "Users can join course queue" on public.course_match_queue;
+create policy "Users can join course queue"
+  on public.course_match_queue for insert
+  with check (auth.uid() = user_id);
+
+drop policy if exists "Users can manage own course queue" on public.course_match_queue;
+create policy "Users can manage own course queue"
+  on public.course_match_queue for update
+  using (auth.uid() = user_id)
+  with check (auth.uid() = user_id);
+
+drop policy if exists "Users can leave course queue" on public.course_match_queue;
+create policy "Users can leave course queue"
+  on public.course_match_queue for delete
+  using (auth.uid() = user_id);
+
 -- RLS Policies for groups
 drop policy if exists "Anyone can view public groups" on public.groups;
 create policy "Anyone can view public groups"
@@ -314,5 +387,7 @@ create index if not exists idx_tee_times_course on public.tee_times(course_id);
 create index if not exists idx_bookings_user on public.bookings(user_id);
 create index if not exists idx_bookings_teetime on public.bookings(tee_time_id);
 create index if not exists idx_matches_users on public.matches(requester_id, matched_user_id);
+create index if not exists idx_course_match_queue_course_date on public.course_match_queue(course_id, play_date, status);
+create index if not exists idx_course_match_queue_user on public.course_match_queue(user_id);
 create index if not exists idx_messages_recipient on public.messages(recipient_id);
 create index if not exists idx_group_members_group on public.group_members(group_id);

@@ -4,6 +4,7 @@
 
 -- Disable RLS temporarily to ensure mock profiles can be inserted
 ALTER TABLE public.profiles DISABLE ROW LEVEL SECURITY;
+ALTER TABLE public.course_match_queue DISABLE ROW LEVEL SECURITY;
 
 -- Drop foreign key constraint temporarily to allow mock profiles
 ALTER TABLE public.profiles DROP CONSTRAINT IF EXISTS profiles_id_fkey;
@@ -445,6 +446,39 @@ INSERT INTO public.profiles (
     )
   ON CONFLICT (id) DO NOTHING;
 
+    -- Seed matchmaking queue entries for mock users so course matchmaking has data
+    WITH queue_seed AS (
+      SELECT '11111111-1111-1111-1111-111111111111'::uuid AS user_id,
+        'Furry Creek Golf & Country Club'::text AS course_name,
+        3 AS days_ahead
+      UNION ALL
+      SELECT '22222222-2222-2222-2222-222222222222'::uuid,
+        'Mayfair Lakes Golf & Country Club',
+        5
+      UNION ALL
+      SELECT '33333333-3333-3333-3333-333333333333'::uuid,
+        'Northlands Golf Course',
+        4
+    )
+    INSERT INTO public.course_match_queue (user_id, course_id, play_date, status, tee_time_id, paired_user_id, match_id, created_at, updated_at)
+    SELECT qs.user_id,
+      c.id,
+      current_date + qs.days_ahead,
+      'searching',
+      null,
+      null,
+      null,
+      now(),
+      now()
+    FROM queue_seed qs
+    JOIN public.courses c ON c.name = qs.course_name
+    ON CONFLICT (user_id, course_id, play_date) DO UPDATE
+    SET status = excluded.status,
+        tee_time_id = null,
+        paired_user_id = null,
+        match_id = null,
+        updated_at = now();
+
 -- Recreate foreign key constraint with NOT VALID to allow existing mock profiles
 ALTER TABLE public.profiles
   ADD CONSTRAINT profiles_id_fkey
@@ -453,6 +487,7 @@ ALTER TABLE public.profiles
   NOT VALID;
 
 ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.course_match_queue ENABLE ROW LEVEL SECURITY;
 
 -- Note: New profiles created through the app will still be validated against auth.users
 -- Only these pre-existing mock profiles are exempt from the constraint check
