@@ -207,13 +207,20 @@ export default function TeeTimesPage() {
                               </span>
                             </div>
                           </div>
-                          <div className="flex items-center justify-between mt-3">
+                          <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between mt-3">
                             <span className="text-lg font-bold text-secondary">
                               ${teeTime.price?.toFixed(2) || "N/A"}
                             </span>
-                            <Button size="sm" asChild>
-                              <Link href={`/tee-times/${teeTime.course.id}/book/${teeTime.id}`}>Book Now</Link>
-                            </Button>
+                            <div className="flex gap-2">
+                              <Button size="sm" variant="outline" asChild>
+                                <Link href={`/tee-times/${teeTime.course.id}?date=${teeTime.date}`}>
+                                  Course & Matching
+                                </Link>
+                              </Button>
+                              <Button size="sm" asChild>
+                                <Link href={`/tee-times/${teeTime.course.id}/book/${teeTime.id}`}>Book Now</Link>
+                              </Button>
+                            </div>
                           </div>
                         </div>
                       </div>
